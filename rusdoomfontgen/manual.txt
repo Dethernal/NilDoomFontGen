@@ -1,0 +1,7 @@
+DRAFT.
+
+Italic and codepages in not work yet (I have no time for them).
+Filter's dialogs open by double click on it.
+Border select filter add bright to pixel if neighbour is transparment (by value from matrix. It's may be negative).
+Font saved in work directory with name "dbigfont.fon2". This lump is ready to add in pk3/pk7.
+Charset may be changed by ading file "chars.txt" in work directory. THIS FILE THREATMENTS AS ASCII 8 BIT BINARY FILE. UNICODE AND MULTIBYTE ENCODINGS DO NOT ALLOWED.
