@@ -351,19 +351,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
+		GetClientRect(hWnd,&r);
 		if (curfont)
 		{
-			GetClientRect(hWnd,&r);
 			curfont->DrawPreviewTo(hdc, r.left, r.top, SRCCOPY);
-			TextOutW(hdc,r.right - 350, 26,t::strtypeface.data(),t::strtypeface.length());
-			TextOutW(hdc,r.right - 350, 58, t::strheight.data(),t::strheight.length());
-			TextOutW(hdc,r.right - 350, 90, t::strweight.data(),t::strweight.length());
-			TextOutW(hdc,r.right - 350, 122, t::stroffset.data(),t::stroffset.length());
-
-			TextOutW(hdc,r.right - 350, 154, t::stritalic.data(),t::stritalic.length());
-			TextOutW(hdc,r.right - 350, 186, t::strcodepage.data(),t::strcodepage.length());
-
 		}
+		TextOutW(hdc,r.right - 350, 26,t::strtypeface.data(),t::strtypeface.length());
+		TextOutW(hdc,r.right - 350, 58, t::strheight.data(),t::strheight.length());
+		TextOutW(hdc,r.right - 350, 90, t::strweight.data(),t::strweight.length());
+		TextOutW(hdc,r.right - 350, 122, t::stroffset.data(),t::stroffset.length());
+
+		TextOutW(hdc,r.right - 350, 154, t::stritalic.data(),t::stritalic.length());
+		TextOutW(hdc,r.right - 350, 186, t::strcodepage.data(),t::strcodepage.length());
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_DESTROY:

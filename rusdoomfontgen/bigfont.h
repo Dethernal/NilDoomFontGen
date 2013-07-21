@@ -14,6 +14,7 @@ public:
 	~BigFont();
 	void ExportToLMP(std::string path);
 	void DrawPreviewTo(HDC dst, int x, int y, unsigned int mode);
+	void DrawChar(char c, HDC dc, int x, int y);
 private:
 	std::string charset;
 	FontImage** images;

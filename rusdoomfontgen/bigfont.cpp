@@ -71,6 +71,8 @@ BigFont::BigFont(HDC modeldc, HFONT fnt, std::string chars, FilterStack *filters
 		if (correctmetrics.tmItalic)
 			origr.right += correctmetrics.tmAveCharWidth;
 
+		origr.right +=1;
+		origr.bottom +=1;
 		DrawTextA(dc,c,1,&r,DT_TOP | DT_LEFT | DT_SINGLELINE | DT_NOCLIP | DT_NOPREFIX);
 //		
 //		or.right += correctmetrics.tmOverhang;
@@ -142,7 +144,46 @@ void BigFont::ExportToLMP(std::string path)
 	fclose(file);
 }
 
+void BigFont::DrawChar(char c, HDC dc, int x, int y)
+{
+	for (FontImage** img = images; img < images + charset.length(); img++)
+		if ((*img)->GetCharRepresentation() == c)
+		{
+			(*img)->DrawTo(dc,x,y);
+			break;
+		}
+}
+
 void BigFont::DrawPreviewTo(HDC dst, int x, int y, unsigned int mode)
 {
-	BitBlt(dst,0,0,imagerect.right,imagerect.bottom,imagedc,x,y, mode);
+	RECT r = {0,0,512,640};
+	HBRUSH  b= CreateSolidBrush(0);
+	HPEN pen = CreatePen(PS_SOLID,1,RGB(255,0,0));
+	FillRect(dst,&r, (HBRUSH) b);
+	HGDIOBJ oldpen = SelectObject(dst,pen);
+	DeleteObject(b);
+	int ax = 0;
+	int ay = 0;
+	int pos = 0;
+	for (char c = charset[0]; pos < charset.length();++pos)
+	{
+		c = charset[pos];
+		FontImage* img = images[pos];
+		MoveToEx(dst,x + ax*30, y + ay*(img->GetHeigth() + 5),0);
+		DrawChar(c, dst, x + ax*30,  y + ay*(img->GetHeigth()+ 5));
+		
+		LineTo(dst,x + ax*30 + img->GetWidth(),y + ay*(img->GetHeigth() + 5));
+		LineTo(dst,x + ax*30 + img->GetWidth(),y + ay*(img->GetHeigth() + 5) + img->GetHeigth());
+		LineTo(dst,x + ax*30,y + ay*(img->GetHeigth() + 5) + img->GetHeigth());
+		LineTo(dst,x + ax*30,y + ay*(img->GetHeigth() + 5));
+		ax++;
+		if (ax > 16)
+		{
+			ax = 0;
+			ay++;
+		}
+	}
+	SelectObject(dst,oldpen);
+	DeleteObject(pen);
+	//BitBlt(dst,0,0,imagerect.right,imagerect.bottom,imagedc,x,y, mode);
 }
