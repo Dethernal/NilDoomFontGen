@@ -15,6 +15,8 @@ public:
 	void ExportToLMP(std::string path);
 	void DrawPreviewTo(HDC dst, int x, int y, unsigned int mode);
 	void DrawChar(char c, HDC dc, int x, int y);
+	const FontImage* GetImage(int num) const;
+	const std::string GetCharset(void) const;
 private:
 	std::string charset;
 	FontImage** images;

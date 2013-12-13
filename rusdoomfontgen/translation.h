@@ -17,6 +17,7 @@ const std::wstring strcreatefont(L"Создать!");
 const std::wstring stritalic(L"Италик");
 const std::wstring strcodepage(L"Кодовая страница");
 
+const std::wstring strmetrics(L"ACS метрика");
 
 
 
@@ -52,7 +53,7 @@ const std::wstring strcreatefont(L"Create!");
 const std::wstring stritalic(L"Italic");
 const std::wstring strcodepage(L"Codepage");
 
-
+const std::wstring strmetrics(L"ACS metrics");
 
 
 const std::wstring filterswindow(L"Filters");

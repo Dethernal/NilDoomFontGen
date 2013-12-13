@@ -18,8 +18,8 @@ public:
 	void DrawBorder(int x1,int y1,int x2,int y2, unsigned char color);
 	void CompressBright(int div, int offset);
 	void SaveAsPCX(std::string path);
-	unsigned int GetHeigth() {return heigth;};
-	unsigned int GetWidth() {return width;};
+	unsigned int GetHeigth() const {return heigth;};
+	unsigned int GetWidth() const {return width;};
 	RLERep* GetRLERep(RLEMode mode);
 	void DumpWithRLE(FILE * f);
 	void DrawTo(HDC dc, int x, int y);

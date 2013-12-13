@@ -35,6 +35,8 @@ HWND kerningselect;
 HWND charsetselect;
 HWND italicselect;
 
+HWND metricgenerationselect;
+
 HWND Processbutton;
 HWND Filtersbutton;
 
@@ -181,8 +183,11 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    kerningselect = CreateWindowExW(WS_EX_CLIENTEDGE,L"EDIT",L"0",WS_CHILD | WS_OVERLAPPED | WS_BORDER,r.right - 200,120,180,24,hWnd,0,hInst,0);
    italicselect = CreateWindowExW(0,L"BUTTON",0,WS_CHILD | WS_OVERLAPPED |  BS_AUTOCHECKBOX,r.right - 200,152,180,24,hWnd,0,hInst,0);
    charsetselect = CreateWindowExW(0,L"COMBOBOX",0,WS_CHILD | CBS_DROPDOWN | CBS_HASSTRINGS | WS_OVERLAPPED | WS_VSCROLL,r.right - 200,184,180,500,hWnd,0,hInst,0);
-   Filtersbutton = CreateWindowExW(0,L"BUTTON",t::strfiltersselect.c_str(),WS_CHILD | WS_OVERLAPPED,r.right - 200,216,180,24,hWnd,0,hInst,0);
-   Processbutton = CreateWindowExW(0,L"BUTTON",t::strcreatefont.c_str(),WS_CHILD | WS_OVERLAPPED,r.right - 200,248,180,24,hWnd,0,hInst,0);
+   
+   metricgenerationselect = CreateWindowExW(0,L"BUTTON",0,WS_CHILD | WS_OVERLAPPED |  BS_AUTOCHECKBOX,r.right - 200,216,180,24,hWnd,0,hInst,0);
+
+   Filtersbutton = CreateWindowExW(0,L"BUTTON",t::strfiltersselect.c_str(),WS_CHILD | WS_OVERLAPPED,r.right - 200,248,180,24,hWnd,0,hInst,0);
+   Processbutton = CreateWindowExW(0,L"BUTTON",t::strcreatefont.c_str(),WS_CHILD | WS_OVERLAPPED,r.right - 200,280,180,24,hWnd,0,hInst,0);
    //SendMessageW(fontselect,LB_SETCOUNT,100,0);
    //MakeDragList(fontselect);
 
@@ -231,6 +236,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    ShowWindow(kerningselect,1);
    ShowWindow(italicselect,1);
    ShowWindow(charsetselect,1);
+
+   ShowWindow(metricgenerationselect,1);
+
    ShowWindow(Processbutton,1);
    ShowWindow(Filtersbutton,1);
 
@@ -360,6 +368,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		TextOutW(hdc,r.right - 350, 58, t::strheight.data(),t::strheight.length());
 		TextOutW(hdc,r.right - 350, 90, t::strweight.data(),t::strweight.length());
 		TextOutW(hdc,r.right - 350, 122, t::stroffset.data(),t::stroffset.length());
+
+		TextOutW(hdc,r.right - 350, 216, t::strmetrics.data(),t::strmetrics.length());
 
 		TextOutW(hdc,r.right - 350, 154, t::stritalic.data(),t::stritalic.length());
 		TextOutW(hdc,r.right - 350, 186, t::strcodepage.data(),t::strcodepage.length());

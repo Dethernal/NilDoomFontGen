@@ -5,8 +5,6 @@
 
 BigFont::BigFont(HDC modeldc, HFONT fnt, std::string chars, FilterStack *filters,int fkerning)
 {
-	SIZE size_r;
-	ABCFLOAT correctw;
 	TEXTMETRICW correctmetrics;
 	kerning = fkerning;
 	chars = SortChars(chars);
@@ -186,4 +184,15 @@ void BigFont::DrawPreviewTo(HDC dst, int x, int y, unsigned int mode)
 	SelectObject(dst,oldpen);
 	DeleteObject(pen);
 	//BitBlt(dst,0,0,imagerect.right,imagerect.bottom,imagedc,x,y, mode);
+}
+const std::string BigFont::GetCharset(void) const
+{
+	return std::string(charset);
+}
+
+
+const FontImage* BigFont::GetImage(int num) const
+{
+	if (num >= charset.length()) return 0;
+	return images[num];
 }
