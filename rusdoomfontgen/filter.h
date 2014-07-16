@@ -15,7 +15,9 @@ public:
 	Filter(std::string StringRep);
 	~Filter(void);
 	virtual std::string FilterToText(void);
+	virtual void OnBeforeAll(void);
 	virtual void Apply(class FontImage &image) = 0;
+	virtual void OnAfterAll(void);
 	const std::string GetFilterName(void);
 	virtual bool ShowDialog(void);
 	virtual bool RegisterDialogClass(HINSTANCE hinst, HWND parentwnd);

@@ -22,7 +22,9 @@ bool Filter::RegisterDialogClass(HINSTANCE hinst, HWND parentwnd) {return false;
 
 Filter::Filter(std::string filtername, bool unused) : name(filtername), condition(0), conditionval("") {}
 
+void Filter::OnAfterAll(void) {};
 
+void Filter::OnBeforeAll(void) {};
 
 void Filter::SetCondition(int ci, std::string &val)
 {
@@ -38,9 +40,9 @@ bool Filter::CheckCondition(char c)
 	case 1:
 		return 0; // never
 	case 2:
-		return (isalpha((unsigned char)c)); // char
+		return (bool)(isalpha((unsigned char)c)); // char
 	case 3:
-		return (isdigit((unsigned char)c)); // dight
+		return (bool)(isdigit((unsigned char)c)); // dight
 	case 4:
 		return (isalpha((unsigned char)c) && (tolower(c) == c)); // lower char
 	case 5:

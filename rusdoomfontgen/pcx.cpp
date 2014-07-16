@@ -21,17 +21,123 @@ const unsigned char magic_constant = 0xc0;
 #define RLECONVBUFFERLENGTH 2048
 unsigned char rleconvbuffer[RLECONVBUFFERLENGTH];
 
-void SaveasPCX256_DOOM(int w, int h, char* data, std::string path)
+int encodeSeq(char c,unsigned char l, FILE* out)
+{
+	if ((l == 1) && (0xC0 != (0xC0 & c)))
+	{
+		fwrite(&c,1,1,out);
+		return 1;
+	}
+	else
+	{
+		l = l | 0xC0;
+		fwrite(&l,1,1,out);
+		fwrite(&c,1,1,out);
+		return 2;
+	}
+
+}
+
+int encodeLinePCX(char* line, int len, FILE* out)
+{
+	unsigned char runcount = 1;
+	int total = 0;
+	char cur = *line;
+	int i;
+	for (int srcIndex = 1; srcIndex < len; srcIndex++)
+	{
+		char next = *(++line);
+        if (next == cur)     /* There is a "run" in the data, encode it */
+                {
+                runcount++;
+                if (runcount == 63)
+                        {
+                        if (! (i = encodeSeq(cur, runcount, out)))
+                                return 0;
+                        total += i;
+                        runcount = 0;
+                        }
+                }
+        else                /* No "run"  -  this != last */
+                {
+                if (runcount)
+                        {
+                        if (! (i = encodeSeq(cur, runcount, out)))
+                                return 0;
+                        total += i;
+                        }
+                cur = next;
+                runcount = 1;
+                }
+        }        /* endloop */
+  if (runcount)        /* finish up */
+        {
+        if (! (i = encodeSeq(cur, runcount, out)))
+                return (0);
+        return (total + i);
+        }
+  return (total);
+}
+
+void encodePCX(int w, int h, char* data, FILE* out)
+{
+	for (int i = 0; i < h; i++)
+	{
+		encodeLinePCX(data+i*w,w,out);
+	}
+}
+
+
+
+void decodeLine(int w, char* line, FILE* in)
+{
+	int i = 0;
+	unsigned char c1;
+	unsigned char c2;
+	while(i < w)
+	{
+		fread(&c1,1,1,in);
+		if ((c1 & 0xC0) == 0xC0)
+		{
+			fread(&c2,1,1,in);
+			c1 = c1 & 0x3F;
+			for (int j = 0; j<c1;j++)
+			{
+				*line = (char) c2;
+				line++;
+			}
+			i+=c1;
+		}
+		else
+		{
+			*line = (char) c1;
+			line++;
+			i+=1;
+		}
+
+	}
+}
+
+void decodePCX(int w, int h, char* data, FILE* in)
+{
+	for (int i =0; i<h;i++)
+	{
+		decodeLine(w,data,in);
+		data += w;
+	}
+}
+
+void SaveasPCX256_DOOM(int w, int h, char* data, std::string path, int encoding)
 {
 	PCXHEAD header;
 	header.Identifier = 0x0A;
 	header.Version = 5;
-	header.Encoding = 1;
+	header.Encoding = encoding?1:0;
 	header.BitsPerPixel = 8;
 	header.XStart = 0;
 	header.YStart = 0;
-	header.XEnd = (unsigned short int) w;
-	header.YEnd = (unsigned short int) h;
+	header.XEnd = (unsigned short int) w-1;
+	header.YEnd = (unsigned short int) h-1;
 	header.HorzRes = 92;
 	header.VertRes = 92;
 	memset(&(header.Palette[0]),0,48);      
@@ -43,11 +149,46 @@ void SaveasPCX256_DOOM(int w, int h, char* data, std::string path)
 	header.VertScreenSize = 0;
 	memset(&(header.Reserved2[0]),0,54);
 
-	FILE *f = fopen(path.c_str(),"bw");
+	FILE *f = fopen(path.c_str(),"wb");
 	fwrite(&header,sizeof(PCXHEAD),1,f);
-	fwrite(&data,1,w * h,f);
+	if (!encoding)
+		fwrite(&data,1,w * h,f);
+	else
+		encodePCX(w,h,data,f);
+
 	fwrite(&magic_constant,1,1,f);
 	fwrite(doompal,1,768,f);
+	fclose(f);
+}
+
+void LoadasPCX256_DOOM(std::string path, int* width, int* height, char** data, char** pal)
+{
+	char * tdata;
+	char * tpal;
+	PCXHEAD header;
+	FILE *f = fopen(path.c_str(),"rb");
+	fread(&header, sizeof(PCXHEAD),1, f);
+	*width = header.XEnd - header.XStart + 1;
+	*height = header.YEnd - header.YStart + 1;
+
+	tdata = new char[*width * *height];
+	*data = tdata;
+
+	tpal = new char[768];
+	*pal = tpal;
+
+	if (header.Encoding == 0)
+	{
+		fread(tdata,1, *width * *height, f);
+	}
+	else
+	{
+		decodePCX(*width, *height,tdata,f);
+	}
+	unsigned char magic = 0;
+	fread(&magic,1, 1, f);
+	if (magic != magic_constant) throw new std::exception();
+	fread(tpal,1, 768, f);
 	fclose(f);
 }
 

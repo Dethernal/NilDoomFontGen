@@ -1,7 +1,5 @@
 #pragma once
 
-//#define ENGLISH
-
 #include <string>
 
 namespace t {
@@ -42,6 +40,8 @@ const std::wstring thresholdfilterwnd(L"Порог");
 
 const std::wstring programname(L"RUSdoomfontgen");
 
+const std::wstring exportend(L"Все изображения экспортированы. Нажмите OK для продолжения.");
+
 #else
 
 const std::wstring strtypeface(L"Typeface");
@@ -71,6 +71,8 @@ const std::wstring thresholdfilterwnd(L"Threshold");
 const std::wstring universalbuttonok(L" Ok ");
 
 const std::wstring programname(L"ENGdoomfontgen");
+
+const std::wstring exportend(L"All images was exported. Press OK to continue.");
 
 #endif
 }

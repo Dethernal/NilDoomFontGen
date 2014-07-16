@@ -42,6 +42,8 @@ HWND Filtersbutton;
 
 BigFont *curfont = 0;
 
+const unsigned int HDC_FONTSELECT = 10001;
+
 // ќтправить объ€влени€ функций, включенных в этот модуль кода:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
@@ -133,7 +135,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.hInstance		= hInstance;
 	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_RUSDOOMFONTGEN));
 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
+	wcex.hbrBackground	= (HBRUSH)GetSysColorBrush(COLOR_3DFACE);
 	wcex.lpszMenuName	= 0;
 	wcex.lpszClassName	= L"PRORAMCLASSNAME1";
 	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
@@ -165,29 +167,47 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    hInst = hInstance; // —охранить дескриптор экземпл€ра в глобальной переменной
 
-   hWnd = CreateWindowW(L"PRORAMCLASSNAME1", t::programname.c_str(), WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+   HFONT fnt = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
 
+   hWnd = CreateWindowW(L"PRORAMCLASSNAME1", t::programname.c_str(), WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
+      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+   SendMessage(hWnd, WM_SETFONT, WPARAM (fnt), TRUE);
    RECT r;
 
    GetClientRect(hWnd, &r);
 
-   fontselect = CreateWindowExW(0,L"COMBOBOX",0,WS_CHILD | CBS_DROPDOWN | CBS_DROPDOWNLIST | CBS_HASSTRINGS | WS_OVERLAPPED | WS_VSCROLL ,r.right - 200,24,180,500,hWnd,0,hInst,0);
+   fontselect = CreateWindowExW(0,L"COMBOBOX",0,WS_CHILD | CBS_DROPDOWN | CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_OVERLAPPED | WS_VSCROLL ,r.right - 250,24,230,500,hWnd,(HMENU) HDC_FONTSELECT,hInst,0);
    LOGFONTW logfont;
    memset(&logfont,0,sizeof(LOGFONTW));
    HDC tmpDC = GetDC(0);
    EnumFontFamiliesExW(tmpDC, &logfont,&EnumFontFamExProcW,0,0);
    ReleaseDC(0,tmpDC);
+
+
+
    heigthselect = CreateWindowExW(WS_EX_CLIENTEDGE,L"EDIT",L"24",WS_CHILD | WS_OVERLAPPED | WS_BORDER,r.right - 200,56,180,24,hWnd,0,hInst,0);
+   SendMessage(heigthselect, WM_SETFONT, WPARAM (fnt), TRUE);
+
    weigthselect =CreateWindowExW(0,L"COMBOBOX",0,WS_CHILD | CBS_DROPDOWN | CBS_DROPDOWNLIST | CBS_HASSTRINGS | WS_OVERLAPPED | WS_VSCROLL,r.right - 200,88,180,500,hWnd,0,hInst,0);
+   SendMessage(weigthselect, WM_SETFONT, WPARAM (fnt), TRUE);  
+
    kerningselect = CreateWindowExW(WS_EX_CLIENTEDGE,L"EDIT",L"0",WS_CHILD | WS_OVERLAPPED | WS_BORDER,r.right - 200,120,180,24,hWnd,0,hInst,0);
+   SendMessage(kerningselect, WM_SETFONT, WPARAM (fnt), TRUE);     
+
    italicselect = CreateWindowExW(0,L"BUTTON",0,WS_CHILD | WS_OVERLAPPED |  BS_AUTOCHECKBOX,r.right - 200,152,180,24,hWnd,0,hInst,0);
+   SendMessage(italicselect, WM_SETFONT, WPARAM (fnt), TRUE); 
+
    charsetselect = CreateWindowExW(0,L"COMBOBOX",0,WS_CHILD | CBS_DROPDOWN | CBS_HASSTRINGS | WS_OVERLAPPED | WS_VSCROLL,r.right - 200,184,180,500,hWnd,0,hInst,0);
+   SendMessage(charsetselect, WM_SETFONT, WPARAM (fnt), TRUE); 
    
-   metricgenerationselect = CreateWindowExW(0,L"BUTTON",0,WS_CHILD | WS_OVERLAPPED |  BS_AUTOCHECKBOX,r.right - 200,216,180,24,hWnd,0,hInst,0);
+//   metricgenerationselect = CreateWindowExW(0,L"BUTTON",0,WS_CHILD | WS_OVERLAPPED |  BS_AUTOCHECKBOX,r.right - 200,216,180,24,hWnd,0,hInst,0);
+//   SendMessage(metricgenerationselect, WM_SETFONT, WPARAM (fnt), TRUE);
 
    Filtersbutton = CreateWindowExW(0,L"BUTTON",t::strfiltersselect.c_str(),WS_CHILD | WS_OVERLAPPED,r.right - 200,248,180,24,hWnd,0,hInst,0);
+   SendMessage(Filtersbutton, WM_SETFONT, WPARAM (fnt), TRUE); 
+   
    Processbutton = CreateWindowExW(0,L"BUTTON",t::strcreatefont.c_str(),WS_CHILD | WS_OVERLAPPED,r.right - 200,280,180,24,hWnd,0,hInst,0);
+   SendMessage(Processbutton, WM_SETFONT, WPARAM (fnt), TRUE); 
    //SendMessageW(fontselect,LB_SETCOUNT,100,0);
    //MakeDragList(fontselect);
 
@@ -266,20 +286,40 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	int wmId, wmEvent;
-	PAINTSTRUCT ps;
-	HDC hdc;
-	char buf[66];
-	RECT r;
-	bool b;
-	int kerning;
-	int fweigth;
-	int fheight;
-	int count;
-	std::unordered_map<std::string,int>::iterator itcp;
-	int codepage;
-
 	HDC tdc;
+	std::unordered_map<std::string,int>::iterator itcp;
+	std::wstring fontname;
+	std::wstring comboboxtext;
+	union {
+	struct { // WM_COMMAND
+		int wmId, wmEvent;
+		int count;
+		int codepage;
+		int fweigth;
+		int fheight;
+		char buf[66];
+		int kerning;
+	};
+	struct { // WM_PAINT
+		PAINTSTRUCT ps;
+		HDC hdc;
+		RECT r;
+		bool b;
+	};
+	struct { // WM_MEASUREITEM
+		MEASUREITEMSTRUCT* mistruct;
+
+	};
+	struct { // WM_DRAWITEM
+		DRAWITEMSTRUCT* distruct;
+		HFONT nfont;
+		HFONT oldfont;
+		int pos;
+		wchar_t wbuf[256];
+		TEXTMETRICW tm;
+	};
+	};
+
 	switch (message)
 	{
 	case WM_COMMAND:
@@ -364,12 +404,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			curfont->DrawPreviewTo(hdc, r.left, r.top, SRCCOPY);
 		}
+		SelectObject(hdc,(HFONT)GetStockObject(DEFAULT_GUI_FONT));
+		SetBkMode(hdc,TRANSPARENT);
 		TextOutW(hdc,r.right - 350, 26,t::strtypeface.data(),t::strtypeface.length());
 		TextOutW(hdc,r.right - 350, 58, t::strheight.data(),t::strheight.length());
 		TextOutW(hdc,r.right - 350, 90, t::strweight.data(),t::strweight.length());
 		TextOutW(hdc,r.right - 350, 122, t::stroffset.data(),t::stroffset.length());
 
-		TextOutW(hdc,r.right - 350, 216, t::strmetrics.data(),t::strmetrics.length());
+		//TextOutW(hdc,r.right - 350, 216, t::strmetrics.data(),t::strmetrics.length());
 
 		TextOutW(hdc,r.right - 350, 154, t::stritalic.data(),t::stritalic.length());
 		TextOutW(hdc,r.right - 350, 186, t::strcodepage.data(),t::strcodepage.length());
@@ -378,6 +420,45 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
+	case WM_DRAWITEM:
+		if ((unsigned int)wParam != HDC_FONTSELECT) return DefWindowProc(hWnd, message, wParam, lParam);
+		distruct = (DRAWITEMSTRUCT*) lParam;
+		if (distruct->itemID == -1) return DefWindowProc(hWnd, message, wParam, lParam);
+		if (distruct->itemID > 0) 
+		{
+			SendMessage(distruct->hwndItem, CB_GETLBTEXT, distruct->itemID, (LPARAM) wbuf);
+			fontname = (wchar_t*) wbuf;
+			comboboxtext = fontname + L" Aa ‘ф 123.";
+		}
+		else
+		{
+			fontname = L"Arial";
+			comboboxtext = L"Nothing?";
+		}
+		if (distruct->itemState == ODS_SELECTED)
+		{
+			FillRect(distruct->hDC,&(distruct->rcItem), GetSysColorBrush(COLOR_HIGHLIGHTTEXT));
+			SelectObject(distruct->hDC,GetSysColorBrush(COLOR_HIGHLIGHTTEXT));
+		}
+		else
+		{
+			SelectObject(distruct->hDC,GetSysColorBrush(COLOR_BACKGROUND));
+		}
+		nfont = CreateFontW(18,0,0,0,400,0,0,0,ANSI_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH,fontname.c_str());
+		oldfont = (HFONT) SelectObject(distruct->hDC, nfont);
+		GetTextMetricsW(distruct->hDC, &tm);
+		ExtTextOutW(distruct->hDC,2 * LOWORD(GetDialogBaseUnits()) / 4,(distruct->rcItem.bottom + distruct->rcItem.top - tm.tmHeight) / 2,ETO_CLIPPED | ETO_OPAQUE, &(distruct->rcItem),  (wchar_t*) comboboxtext.c_str(), comboboxtext.length(), 0);
+		SelectObject(distruct->hDC, oldfont);
+		DeleteObject(nfont);
+
+		return true;
+
+	case WM_MEASUREITEM:
+		if ((unsigned int)wParam != HDC_FONTSELECT) return DefWindowProc(hWnd, message, wParam, lParam);
+		mistruct = (MEASUREITEMSTRUCT*) lParam;
+		mistruct->itemHeight = 26;
+		return true;
+
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}

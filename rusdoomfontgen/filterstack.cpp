@@ -9,6 +9,8 @@ FilterStack::FilterStack(void)
 {
 	filterstype["Border"] = 0;
 	filterstype["Threshold"] = 1;
+	filterstype["Import"] = 2;
+	filterstype["Export"] = 3;
 
 	filtersconditions["always"] = 0;
 	filtersconditions["never"] = 1;
@@ -43,6 +45,14 @@ void FilterStack::AddFilter(int filtertype)
 		break;
 	case 1:
 		f = new ThresholdFilter();
+		filters.push_back(f);
+		break;
+	case 2:
+		f = new ImportFilter();
+		filters.push_back(f);
+		break;
+	case 3:
+		f = new ExportFilter();
 		filters.push_back(f);
 		break;
 	default:
@@ -101,8 +111,8 @@ void FilterStack::FilterOptions(int pos)
 	}
 	if (!((*r)->ShowDialog()))
 	{
-		(*r)->RegisterDialogClass(curfilterstack->winclass.hInstance,curfilterstack->wnd);
-		(*r)->ShowDialog();
+		bool hasdlg = (*r)->RegisterDialogClass(curfilterstack->winclass.hInstance,curfilterstack->wnd);
+		if (hasdlg) (*r)->ShowDialog();
 	}
 }
 
@@ -157,7 +167,7 @@ bool FilterStack::RegisterDialogClass(HINSTANCE hinst, HWND parentwnd)
 	winclass.hInstance		= hinst;
 	winclass.hIcon			= LoadIcon(hinst, MAKEINTRESOURCE(IDI_RUSDOOMFONTGEN));
 	winclass.hCursor		= LoadCursor(NULL, IDC_ARROW);
-	winclass.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
+	winclass.hbrBackground	= (HBRUSH)GetSysColorBrush(COLOR_3DFACE);
 	winclass.lpszMenuName	= 0;
 	winclass.lpszClassName	= L"FiltersClassDialog";
 	winclass.hIconSm		= LoadIcon(winclass.hInstance, MAKEINTRESOURCE(IDI_SMALL));
@@ -254,22 +264,40 @@ LRESULT CALLBACK FilterStack::FiltersWndProc(HWND hWnd, UINT message, WPARAM wPa
 
 void FilterStack::CreateWindowInstance(void)
 {
-	wnd = CreateWindowExW(0,L"FiltersClassDialog", t::filterswindow.c_str(), WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, 300, 432, parent, NULL, winclass.hInstance, NULL);
+	wnd = CreateWindowExW(0,L"FiltersClassDialog", t::filterswindow.c_str(), WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX, CW_USEDEFAULT, 0, 300, 432, parent, NULL, winclass.hInstance, NULL);
 //	PrintLastError();
+
+	HFONT fnt = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+
 	filterstypes  =CreateWindowExW(0,L"COMBOBOX",0,WS_CHILD | CBS_DROPDOWN | CBS_DROPDOWNLIST | CBS_HASSTRINGS | WS_OVERLAPPED | WS_VSCROLL | WS_VISIBLE,25,24,250,500,wnd,0,0,0);
+	SendMessage(filterstypes, WM_SETFONT, WPARAM (fnt), TRUE);
+
 	filtersaadd  = CreateWindowExW(0,L"BUTTON",t::filterswindowaddfilter.c_str(),WS_CHILD | WS_OVERLAPPED | WS_VISIBLE,25,56,125,24,wnd,0,0,0);
+	SendMessage(filtersaadd, WM_SETFONT, WPARAM (fnt), TRUE);
+
 	filtersadelete  = CreateWindowExW(0,L"BUTTON",t::filterswindowdeletefilter.c_str(),WS_CHILD | WS_OVERLAPPED | WS_VISIBLE,150,56,125,24,wnd,0,0,0);
+	SendMessage(filtersadelete, WM_SETFONT, WPARAM (fnt), TRUE);
 
 	filterslist = CreateWindowExW(0,L"LISTBOX",0,WS_CHILD | LBS_NOTIFY | WS_BORDER | WS_VSCROLL | WS_VISIBLE,25,88,250,120,wnd,0,0,0);
+	SendMessage(filterslist, WM_SETFONT, WPARAM (fnt), TRUE);
 
 	upbutton  = CreateWindowExW(0,L"BUTTON",t::filterswindowupfilter.c_str(),WS_CHILD | WS_OVERLAPPED | WS_VISIBLE,25,272,125,24,wnd,0,0,0);
+	SendMessage(upbutton, WM_SETFONT, WPARAM (fnt), TRUE);
+
 	downbutton  = CreateWindowExW(0,L"BUTTON",t::filterswindowdownfilter.c_str(),WS_CHILD | WS_OVERLAPPED | WS_VISIBLE,150,272,125,24,wnd,0,0,0);
+	SendMessage(downbutton, WM_SETFONT, WPARAM (fnt), TRUE);
+
 	filtersok  = CreateWindowExW(0,L"BUTTON",t::universalbuttonok.c_str(),WS_CHILD | WS_OVERLAPPED | WS_VISIBLE,25,304,250,24,wnd,0,0,0);
+	SendMessage(filtersok, WM_SETFONT, WPARAM (fnt), TRUE);
 
 	filtersconditionselect = CreateWindowExW(0,L"COMBOBOX",0,WS_CHILD | CBS_DROPDOWN | CBS_DROPDOWNLIST | CBS_HASSTRINGS | WS_OVERLAPPED | WS_VSCROLL | WS_VISIBLE,25,208,100,500,wnd,0,0,0);
+	SendMessage(filtersconditionselect, WM_SETFONT, WPARAM (fnt), TRUE);
+	
 	filtersconditionvalue = CreateWindowExW(WS_EX_CLIENTEDGE,L"EDIT",0,WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL,125,208,150,24,wnd,0,winclass.hInstance,0);
+	SendMessage(filtersconditionvalue, WM_SETFONT, WPARAM (fnt), TRUE);
 
 	filterschangeconditionbutton = CreateWindowExW(0,L"BUTTON",t::filtersapplycondition.c_str(),WS_CHILD | WS_OVERLAPPED | WS_VISIBLE,25,240,250,24,wnd,0,0,0);
+	SendMessage(filterschangeconditionbutton, WM_SETFONT, WPARAM (fnt), TRUE);
 
 	for (std::unordered_map<std::string, int>::iterator i = filterstype.begin(); i != filterstype.end() ; i++)
 		SendMessageA(filterstypes, CB_ADDSTRING,0,(LPARAM)i->first.c_str());
@@ -282,11 +310,18 @@ void FilterStack::CreateWindowInstance(void)
 	SendMessageA(filtersconditionvalue,EM_SETLIMITTEXT,256,0);
 }
 
-void FilterStack::Process(FontImage &img)
+void FilterStack::Process(FontImage **img, int count)
 {
 	for (std::list<Filter*>::iterator i = filters.begin(); i != filters.end(); i++)
-		if ((*i)->CheckCondition(img.GetCharRepresentation()))
-			(*i)->Apply(img);
+	{
+		(*i)->OnBeforeAll();
+		for (int j = 0; j<count; j++)
+		{
+		if ((*i)->CheckCondition(img[j]->GetCharRepresentation()))
+			(*i)->Apply(*img[j]);
+		}
+		(*i)->OnAfterAll();
+	}
 }
 
 WNDCLASSEXW FilterStack::winclass;

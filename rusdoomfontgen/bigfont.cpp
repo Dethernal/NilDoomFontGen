@@ -88,10 +88,12 @@ BigFont::BigFont(HDC modeldc, HFONT fnt, std::string chars, FilterStack *filters
 	for (unsigned int i = 0; i< charset.length();i++)
 	{
 		images[i]->CompressBright(8,111);
-		if (filters) 
-			filters->Process(*images[i]);
-		//images[i]->DrawBorder(0,0,images[i]->GetWidth(),images[i]->GetHeigth(),255);
 	}
+	if (filters) 
+		filters->Process(images, charset.length());
+		//images[i]->DrawBorder(0,0,images[i]->GetWidth(),images[i]->GetHeigth(),255);
+
+
 }
 BigFont::~BigFont()
 {
@@ -162,7 +164,7 @@ void BigFont::DrawPreviewTo(HDC dst, int x, int y, unsigned int mode)
 	DeleteObject(b);
 	int ax = 0;
 	int ay = 0;
-	int pos = 0;
+	unsigned int pos = 0;
 	for (char c = charset[0]; pos < charset.length();++pos)
 	{
 		c = charset[pos];
@@ -191,7 +193,7 @@ const std::string BigFont::GetCharset(void) const
 }
 
 
-const FontImage* BigFont::GetImage(int num) const
+const FontImage* BigFont::GetImage(unsigned int num) const
 {
 	if (num >= charset.length()) return 0;
 	return images[num];

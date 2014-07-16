@@ -41,6 +41,9 @@ private:
 	unsigned int rledatacount;
 };
 
-void SaveasPCX256_DOOM(int w, int h, char* data);
+void SaveasPCX256_DOOM(int w, int h, char* data, std::string path, int encoding = 1);
+
+void LoadasPCX256_DOOM(std::string path, int* width, int* height, char** data, char** pal);
+
 LONG packrow (BYTE *pSource, FILE *dest, LONG rowSize);
 #endif

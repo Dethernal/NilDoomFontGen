@@ -7,6 +7,8 @@
 #include "fontimage.h"
 #include "borderfilter.h"
 #include "thresholdfilter.h"
+#include "importfilter.h"
+#include "exportfilter.h"
 #include "filter.h"
 #include <list>
 #include <unordered_map>
@@ -18,7 +20,7 @@ public:
 	FilterStack(void);
 	~FilterStack(void);
 	void ShowFilterStackWindow(void);
-	void Process(FontImage &img);
+	void Process(FontImage **imgs, int count);
 	bool RegisterDialogClass(HINSTANCE hinst, HWND parentwnd);
 private:
 	void RemakeList(void);

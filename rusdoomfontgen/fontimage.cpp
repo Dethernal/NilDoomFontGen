@@ -43,7 +43,21 @@ FontImage::~FontImage()
 }
 void FontImage::SaveAsPCX(std::string path)
 {
+	SaveasPCX256_DOOM(GetWidth(),GetHeigth(), (char*) data, path);
+}
 
+void FontImage::ReadFromPCX(std::string path)
+{
+	int rw;
+	int rh;
+	char* dat;
+	char* pal;
+	LoadasPCX256_DOOM(path, &rw, &rh, &dat, &pal);
+	if (GetWidth() != rw) throw new std::runtime_error("Image Error: "+ path);
+	if (GetHeigth() != rh) throw new std::runtime_error("Image Error: "+ path);
+	memcpy(data, dat, rw * rh);
+	delete[] dat;
+	delete[] pal;
 }
 
 void FontImage::DrawBorder(int x1,int y1,int x2,int y2, unsigned char color)
@@ -123,3 +137,6 @@ std::string SortChars(std::string str)
 	std::string s(buf);
 	return s;
 }
+
+unsigned int FontImage::GetHeigth() const {return heigth;};
+unsigned int FontImage::GetWidth() const {return width;};
