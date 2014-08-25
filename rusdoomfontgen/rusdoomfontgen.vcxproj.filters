@@ -79,6 +79,9 @@
     <ClInclude Include="importfilter.h">
       <Filter>Заголовочные файлы\Filters</Filter>
     </ClInclude>
+    <ClInclude Include="font.h">
+      <Filter>Заголовочные файлы</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -116,6 +119,9 @@
     </ClCompile>
     <ClCompile Include="exportfilter.cpp">
       <Filter>Файлы исходного кода\Filters</Filter>
+    </ClCompile>
+    <ClCompile Include="font.cpp">
+      <Filter>Файлы исходного кода</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -11,15 +11,16 @@
 [Dd]ebug/
 [Rr]elease/
 [Rr]elease (Russian)
+
 x64/
 build/
 [Bb]in/
 [Oo]bj/
+*.[Pp][Cc][Xx]
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
-
 *_i.c
 *_p.c
 *.ilk
@@ -149,3 +150,4 @@ $RECYCLE.BIN/
 .DS_Store
 
 *.fon2
+*.pcx

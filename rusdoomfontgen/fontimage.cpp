@@ -53,10 +53,18 @@ void FontImage::ReadFromPCX(std::string path)
 	char* dat;
 	char* pal;
 	LoadasPCX256_DOOM(path, &rw, &rh, &dat, &pal);
-	if (GetWidth() != rw) throw new std::runtime_error("Image Error: "+ path);
-	if (GetHeigth() != rh) throw new std::runtime_error("Image Error: "+ path);
-	memcpy(data, dat, rw * rh);
-	delete[] dat;
+
+	if (GetHeigth() != rh) throw new std::runtime_error("Image Error: "+ path); // Still error: each glyph must have equal height
+
+	if ((GetWidth() == rw) && (GetHeigth() == rh)) {
+		memcpy(data, dat, rw * rh);
+		delete[] dat;
+	}
+	else {
+		delete[] data;
+		width = rw;
+		data = (unsigned char*) dat;
+	}
 	delete[] pal;
 }
 
@@ -109,6 +117,9 @@ void FontImage::DrawTo(HDC dc, int x, int y)
 		{
 			int b = 0;
 			unsigned char c = data[j*width+i];
+			unsigned char *paladdr = doompal + (int)c * 3;
+			SetPixel(dc,x+i,y+j,RGB(*paladdr,*(paladdr+1),*(paladdr+2)));
+			/*
 			if (c < 80)
 			{
 				if (c != 0)
@@ -117,6 +128,7 @@ void FontImage::DrawTo(HDC dc, int x, int y)
 			else
 				b = (111 - c) * 8;
 			SetPixel(dc,x+i,y+j,RGB(b,b,b));
+			*/
 		}
 
 }

@@ -1,13 +1,10 @@
 #include "stdafx.h"
 #include "bigfont.h"
 #include <math.h>
-//#include "rusdoomfontgen.h"
 
-BigFont::BigFont(HDC modeldc, HFONT fnt, std::string chars, FilterStack *filters,int fkerning)
+BigFont::BigFont(HDC modeldc, HFONT fnt, std::string chars, FilterStack *filters,int fkerning) : Font(modeldc, fnt, chars, filters, fkerning)
 {
 	TEXTMETRICW correctmetrics;
-	kerning = fkerning;
-	chars = SortChars(chars);
 	int tx = 0;
 	int ty = 0;
 	HDC dc;
@@ -16,7 +13,6 @@ BigFont::BigFont(HDC modeldc, HFONT fnt, std::string chars, FilterStack *filters
 	HBITMAP bmp;
 	const char Wchar = 'W';
 	HBRUSH brush = CreateSolidBrush(RGB(0,0,0));
-	charset = chars;
 
 	dc = CreateCompatibleDC(modeldc);
 	bmp = CreateCompatibleBitmap(modeldc,100,100);
@@ -47,7 +43,6 @@ BigFont::BigFont(HDC modeldc, HFONT fnt, std::string chars, FilterStack *filters
 	imagerect.top = 0;
 	imagerect.bottom = paddingY * 16;
 	FillRect(imagedc, &r, brush);
-	images = (FontImage**) malloc((chars.length()) * sizeof (FontImage*));
 	
 	
 	for (unsigned int i = 0; i< chars.length();i++)
@@ -97,10 +92,9 @@ BigFont::BigFont(HDC modeldc, HFONT fnt, std::string chars, FilterStack *filters
 }
 BigFont::~BigFont()
 {
-	for (unsigned int i = 0; i<charset.length();i++)
-		delete images[i];
-	free(images);
+
 }
+
 void BigFont::ExportToLMP(std::string path)
 {
 	const char* fon2 = "FON2";
@@ -142,59 +136,4 @@ void BigFont::ExportToLMP(std::string path)
 		images[i]->DumpWithRLE(file);
 	}
 	fclose(file);
-}
-
-void BigFont::DrawChar(char c, HDC dc, int x, int y)
-{
-	for (FontImage** img = images; img < images + charset.length(); img++)
-		if ((*img)->GetCharRepresentation() == c)
-		{
-			(*img)->DrawTo(dc,x,y);
-			break;
-		}
-}
-
-void BigFont::DrawPreviewTo(HDC dst, int x, int y, unsigned int mode)
-{
-	RECT r = {0,0,512,640};
-	HBRUSH  b= CreateSolidBrush(0);
-	HPEN pen = CreatePen(PS_SOLID,1,RGB(255,0,0));
-	FillRect(dst,&r, (HBRUSH) b);
-	HGDIOBJ oldpen = SelectObject(dst,pen);
-	DeleteObject(b);
-	int ax = 0;
-	int ay = 0;
-	unsigned int pos = 0;
-	for (char c = charset[0]; pos < charset.length();++pos)
-	{
-		c = charset[pos];
-		FontImage* img = images[pos];
-		MoveToEx(dst,x + ax*30, y + ay*(img->GetHeigth() + 5),0);
-		DrawChar(c, dst, x + ax*30,  y + ay*(img->GetHeigth()+ 5));
-		
-		LineTo(dst,x + ax*30 + img->GetWidth(),y + ay*(img->GetHeigth() + 5));
-		LineTo(dst,x + ax*30 + img->GetWidth(),y + ay*(img->GetHeigth() + 5) + img->GetHeigth());
-		LineTo(dst,x + ax*30,y + ay*(img->GetHeigth() + 5) + img->GetHeigth());
-		LineTo(dst,x + ax*30,y + ay*(img->GetHeigth() + 5));
-		ax++;
-		if (ax > 16)
-		{
-			ax = 0;
-			ay++;
-		}
-	}
-	SelectObject(dst,oldpen);
-	DeleteObject(pen);
-	//BitBlt(dst,0,0,imagerect.right,imagerect.bottom,imagedc,x,y, mode);
-}
-const std::string BigFont::GetCharset(void) const
-{
-	return std::string(charset);
-}
-
-
-const FontImage* BigFont::GetImage(unsigned int num) const
-{
-	if (num >= charset.length()) return 0;
-	return images[num];
 }

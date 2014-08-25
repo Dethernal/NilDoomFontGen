@@ -4,6 +4,7 @@
 #define __CONFONT_H__
 #include "stdafx.h"
 #include "fontimage.h"
+#include "font.h"
 
 
 #endif

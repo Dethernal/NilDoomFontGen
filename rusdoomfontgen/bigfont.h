@@ -5,26 +5,14 @@
 #include "stdafx.h"
 #include "fontimage.h"
 #include "filterstack.h"
+#include "font.h"
 
-class BigFont
+class BigFont : public Font
 {
 public:
-//	BigFont(HBITMAP bmp, std::string chars)
-	BigFont(HDC modeldc, HFONT fnt, std::string chars, FilterStack *filters = 0,int fkerning = 0) ;
+	BigFont(HDC modeldc, HFONT fnt, std::string chars, FilterStack *filters = 0,int fkerning = 0);
 	~BigFont();
 	void ExportToLMP(std::string path);
-	void DrawPreviewTo(HDC dst, int x, int y, unsigned int mode);
-	void DrawChar(char c, HDC dc, int x, int y);
-	const FontImage* GetImage(unsigned int num) const;
-	const std::string GetCharset(void) const;
-private:
-	std::string charset;
-	FontImage** images;
-	HDC imagedc;
-	HBITMAP imagebmp;
-	RECT imagerect;
-	short int kerning;
-
 };
 
 #endif

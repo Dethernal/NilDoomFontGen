@@ -119,6 +119,7 @@
     <ClInclude Include="exportfilter.h" />
     <ClInclude Include="filter.h" />
     <ClInclude Include="filterstack.h" />
+    <ClInclude Include="font.h" />
     <ClInclude Include="fontimage.h" />
     <ClInclude Include="importfilter.h" />
     <ClInclude Include="pcx.h" />
@@ -136,6 +137,7 @@
     <ClCompile Include="exportfilter.cpp" />
     <ClCompile Include="filter.cpp" />
     <ClCompile Include="filterstack.cpp" />
+    <ClCompile Include="font.cpp" />
     <ClCompile Include="fontimage.cpp" />
     <ClCompile Include="importfilter.cpp" />
     <ClCompile Include="pcx.cpp" />

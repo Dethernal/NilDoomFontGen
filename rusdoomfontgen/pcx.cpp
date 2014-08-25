@@ -16,7 +16,7 @@ static char buf[256];	/* [TBD] should be 128?  on stack?*/
 #define GetByte()		(*source++)
 #define PutByte(c)		{ putc (c, dest); ++putSize; }
 
-const unsigned char magic_constant = 0xc0;
+const unsigned char magic_constant = 0x0c;
 
 #define RLECONVBUFFERLENGTH 2048
 unsigned char rleconvbuffer[RLECONVBUFFERLENGTH];
@@ -138,9 +138,10 @@ void SaveasPCX256_DOOM(int w, int h, char* data, std::string path, int encoding)
 	header.YStart = 0;
 	header.XEnd = (unsigned short int) w-1;
 	header.YEnd = (unsigned short int) h-1;
-	header.HorzRes = 92;
-	header.VertRes = 92;
-	memset(&(header.Palette[0]),0,48);      
+	header.HorzRes = 72;
+	header.VertRes = 72;
+	memcpy(header.Palette,EGA_PCX_PAL,sizeof(EGA_PCX_PAL));
+	//memset(&(header.Palette[0]),0,48);      
 	header.Reserved1 = 0;
 	header.NumBitPlanes = 1;
 	header.BytesPerLine = (unsigned short int) w;
@@ -168,6 +169,9 @@ void LoadasPCX256_DOOM(std::string path, int* width, int* height, char** data, c
 	PCXHEAD header;
 	FILE *f = fopen(path.c_str(),"rb");
 	fread(&header, sizeof(PCXHEAD),1, f);
+
+	if (header.BitsPerPixel != 8) throw new std::runtime_error("Unsupported PCX file. Only 256-pallette images are alailable.");
+
 	*width = header.XEnd - header.XStart + 1;
 	*height = header.YEnd - header.YStart + 1;
 
@@ -187,7 +191,7 @@ void LoadasPCX256_DOOM(std::string path, int* width, int* height, char** data, c
 	}
 	unsigned char magic = 0;
 	fread(&magic,1, 1, f);
-	if (magic != magic_constant) throw new std::exception();
+	if (magic != magic_constant) throw new std::runtime_error("Bad PCX file.");
 	fread(tpal,1, 768, f);
 	fclose(f);
 }
